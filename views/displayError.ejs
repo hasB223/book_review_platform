@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Error</title>
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+    <link rel="icon" href="/images/icon16x16.png" type="image/x-icon" />
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-dark">
+      <a href="/all" style="text-decoration: none">
+        <button type="button" class="btn btn-outline-light">
+          <img src="/images/icon16x16.png" alt="Icon" class="mr-2" />Book
+          Reviews
+        </button>
+      </a>
+      <a href="/add" style="text-decoration: none; color: white">
+        <button type="button" class="btn btn-success ml-3">Add Book</button>
+      </a>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item mr-2">
+            <button type="button" class="btn btn-outline-danger">
+              <strong>ERROR</strong>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <!-- Navbar -->
+    <div class="p-3">
+      <div class="container-fluid border border-primary-subtle rounded p-3">
+        <fieldset>
+          <div class="row">
+            <div
+              class="text-danger border border-danger rounded"
+              style="padding: 5px; margin: 20px; width: fit-content"
+            >
+              <h2>Status Code: <%= statusCode %></h2>
+              <h2>Error: <%= message %></h2>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+    </div>
+  </body>
+</html>

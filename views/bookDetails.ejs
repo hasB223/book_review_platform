@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link rel="icon" href="/images/icon16x16.png" type="image/x-icon" />
+  </head>
+  <body>
+    <!-- Navbar Starts -->
+    <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-dark">
+      <a href="/all" style="text-decoration: none">
+        <button type="button" class="btn btn-outline-light">
+          <img src="/images/icon16x16.png" alt="Icon" class="mr-2" />Book
+          Reviews
+        </button>
+      </a>
+      <a href="/add" style="text-decoration: none; color: white">
+        <button type="button" class="btn btn-success ml-3">Add Book</button>
+      </a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <span class="navbar-text mr-2">Delete this book?</span>
+          </li>
+          <li class="nav-item mr-2">
+            <form
+              action="/<%= book.id %>/removeBook"
+              method="post"
+              style="display: inline"
+            >
+              <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <!-- Navbar Ends -->
+
+    <div class="d-flex justify-content-between p-3">
+      <div class="container-fluid mt-2">
+        <div class="row">
+          <div
+            class="col-md-4 col-sm-6 d-flex align-items-center justify-content-center"
+          >
+            <img
+              src="<%= book.BookImage %>"
+              alt="Book Cover"
+              class="img-fluid shadow rounded"
+              style="width: 80%"
+            />
+          </div>
+
+          <!-- Column 2: Title, Author, Description, and Rating -->
+          <div class="col-md-8 col-sm-6 book-details">
+            <h2><%= book.BookName %></h2>
+            <p><b>Description:</b> <%= book.Description %></p>
+            <p><b>Author:</b> <%= book.BookAuthor %></p>
+            <!-- Display average rating and total ratings -->
+            <p id="averageRatingElement">
+              <b>Rating:</b>
+              <% if (ratings.averageRating !== null) { %> <%=
+              ratings.averageRating.toFixed(1) %> / 5 (<%= ratings.totalRatings
+              %> reviews) <% } else { %> No ratings yet. <% } %>
+            </p>
+            <div class="ratings-wrapper">
+              <div data-bookId="<%= book.id %>" class="ratings">
+                <span data-rating="5">&#9733;</span>
+                <span data-rating="4">&#9733;</span>
+                <span data-rating="3">&#9733;</span>
+                <span data-rating="2">&#9733;</span>
+                <span data-rating="1">&#9733;</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 3: Comments -->
+        <!-- View existing comments -->
+        <div class="mt-5 rounded">
+          <% reviews.forEach(review => { %>
+          <div
+            class="border border-success-subtle p-1 mt-1 bg-light font-weight-bold"
+          >
+            <p class="comment-text m-0"><%= review.review %></p>
+          </div>
+          <% }); %>
+        </div>
+
+        <!-- Add new comment -->
+        <div class="mt-4 bg-light rounded shadow p-2">
+          <fieldset>
+            <% if (errors && errors.length > 0) { %>
+            <div class="row">
+              <div
+                class="col-md-5 col-sm-12 text-danger border border-danger rounded"
+                style="padding: 5px; margin: 20px; width: fit-content"
+              >
+                <ul
+                  style="
+                    list-style-type: disc;
+                    padding-left: 30px;
+                    text-transform: none;
+                    margin: 0;
+                  "
+                >
+                  <% errors.forEach(error => { %>
+                  <li><%= error %></li>
+                  <% }); %>
+                </ul>
+              </div>
+            </div>
+            <% } %>
+            <input value="<%= book.id %>" type="hidden" />
+            <form id="comment" action="/<%= book.id %>/addReview" method="POST">
+              <div class="d-flex flex-row align-items-start">
+                <textarea
+                  id="commentInput"
+                  name="review"
+                  class="form-control ml-1 shadow-none textarea w-100"
+                  placeholder="Write a review comment..."
+                  required
+                ></textarea>
+              </div>
+              <div class="mt-2 text-right">
+                <button
+                  class="btn btn-primary btn-sm shadow-none"
+                  type="submit"
+                >
+                  Post comment
+                </button>
+                <button
+                  class="btn btn-outline-primary btn-sm ml-1 shadow-none"
+                  type="reset"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </fieldset>
+        </div>
+      </div>
+    </div>
+    <script>
+      // Get the book ID from the template (assuming it's injected into the HTML)
+      const bookId = <%= book.id %>;
+
+      // Function to send the selected rating to the server and update UI
+      async function fetchAndUpdateRatingData(rating) {
+        try {
+          // Disable star click listeners during fetch operation
+          const stars = document.querySelectorAll(".ratings span");
+          for (const star of stars) {
+            star.removeEventListener("click", starClickHandler);
+          }
+
+          // Send the selected rating to the server
+          const response = await fetch(`/${bookId}/addRating`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ rating }),
+          });
+
+          if (!response.ok) {
+            console.error("Failed to send rating to the server.");
+            return;
+          }
+
+          // Fetch updated rating data from the server
+          const responseUpdated = await fetch(`/${bookId}/getRating`);
+          if (responseUpdated.ok) {
+            const updatedData = await responseUpdated.json();
+            updateUI(updatedData);
+          } else {
+            console.error("Failed to fetch updated rating data.");
+          }
+        } catch (error) {
+          console.error("Error sending rating:", error);
+        } finally {
+          // Re-enable star click listeners after fetch operation
+          for (const star of stars) {
+            star.addEventListener("click", starClickHandler);
+          }
+        }
+      }
+
+      // Function to update the UI with the new rating data
+      function updateUI(updatedData) {
+        const averageRatingElement = document.getElementById("averageRatingElement");
+        averageRatingElement.innerHTML = `<b>Rating:</b> ${updatedData.averageRating.toFixed(1)} / 5 (${updatedData.totalRatings} reviews)`;
+        updateRatingUI(null, updatedData.averageRating);
+      }
+
+      // Function to update the highlighted stars based on the average rating
+      function updateRatingUI(newRating, averageRating) {
+        const productRatings = document.querySelector(`[data-bookId="${bookId}"]`);
+        const reverse = Array.from(productRatings.children).reverse();
+
+         // Check if averageRating is not null before accessing the reverse array
+      if (averageRating !== null) {
+        const index = Math.round(averageRating) - 1;
+
+        for (const star of productRatings.children) {
+          star.removeAttribute("data-clicked");
+        }
+
+          // Check if the index is within the valid range
+        if (index >= 0 && index < reverse.length) {
+          reverse[index].setAttribute("data-clicked", "true");
+        }
+      }
+      }
+
+
+      // Get the initial average rating from the JSON data
+      const initialAverageRating = <%=ratings.averageRating || 0%>;
+
+      // Call updateRatingUI to highlight stars based on initial average rating
+      updateRatingUI(null, initialAverageRating);
+
+      // Function to handle star click events
+      function starClickHandler() {
+        // Call fetchAndUpdateRatingData when a star is clicked
+        fetchAndUpdateRatingData(this.dataset.rating);
+      }
+
+      // Attach click event listeners to stars
+      const stars = document.querySelectorAll(".ratings span");
+      for (const star of stars) {
+        star.addEventListener("click", starClickHandler);
+      }
+    </script>
+  </body>
+</html>
