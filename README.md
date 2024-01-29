@@ -1,4 +1,4 @@
-##Book Review Platform
+## Book Review Platform
 
 - A full-stack book review web application which displays numbers of book collections
 - User can add a new book, give rating and write reviews to any of the books available in the database
